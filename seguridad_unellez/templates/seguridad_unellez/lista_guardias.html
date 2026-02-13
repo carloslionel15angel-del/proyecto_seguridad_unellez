@@ -1,0 +1,143 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Control de Guardias – UNELLEZ</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header img { width: 100px; margin-bottom: 10px; }
+        .card-stats { border: none; border-radius: 12px; transition: transform 0.3s; }
+        .card-stats:hover { transform: translateY(-5px); }
+        .table-container { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .badge-status { font-size: 0.85em; padding: 0.5em 1em; }
+        .text-orange { color: #fd7e14; }
+        .text-indigo { color: #6610f2; }
+    </style>
+</head>
+
+<body class="container py-5">
+
+    <div class="header">
+        <img src="{% static 'seguridad_unellez/logo.png' %}" alt="Logo UNELLEZ">
+        <h1 class="display-5 fw-bold">Sistema de Registro de Guardias de Seguridad – UNELLEZ</h1>
+        <p class="text-secondary">Monitoreo de Horas y Asistencia</p>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card card-stats bg-white shadow-sm p-3 border-start border-primary border-5">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 bg-primary text-white rounded-circle p-3 me-3">
+                        <i class="bi bi-people-fill fs-3"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-0">Total Personal</h6>
+                        <span class="h4 fw-bold">{{ guardias.count }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-stats bg-white shadow-sm p-3 border-start border-success border-5">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 bg-success text-white rounded-circle p-3 me-3">
+                        <i class="bi bi-clock-history fs-3"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-0">Estatus Activo</h6>
+                        <span class="h4 fw-bold">Oficiales Listos</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-stats bg-white shadow-sm p-3 border-start border-warning border-5">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 bg-warning text-white rounded-circle p-3 me-3">
+                        <i class="bi bi-calendar-check fs-3"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-0">Último Registro</h6>
+                        <span class="h4 fw-bold">Hoy</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="mb-0">Registro de Asistencia</h3>
+            <a href="{% url 'crear_guardia' %}" class="btn btn-dark">
+                <i class="bi bi-plus-lg"></i> Nueva Guardia
+            </a>
+        </div>
+        
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Oficial / Área</th>
+                    <th>Cédula</th>
+                    <th>Turno</th>
+                    <th>Días/Horas</th>
+                    <th>Estatus</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for guardia in guardias %}
+                <tr>
+                    <td>
+                        <div class="fw-bold">{{ guardia.nombre }}</div>
+                        <small class="text-muted">{{ guardia.area_asignada }}</small>
+                    </td>
+                    <td>{{ guardia.cedula }}</td>
+                    <td>
+                        {% if 'Nocturno' in guardia.turno %}
+                            <span class="text-indigo"><i class="bi bi-moon-stars-fill"></i> {{ guardia.turno }}</span>
+                        {% else %}
+                            <span class="text-orange"><i class="bi bi-sun-fill"></i> {{ guardia.turno }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="progress" style="height: 10px; width: 100px;">
+                            <div class="progress-bar bg-info" style="width: {{ guardia.horas_trabajadas }}%"></div>
+                        </div>
+                        <small class="text-muted">{{ guardia.dias_trabajados }} días / {{ guardia.horas_trabajadas }}h</small>
+                    </td>
+                    <td>
+                        {% if guardia.estatus == 'Activo' %}
+                        <span class="badge badge-status bg-success-subtle text-success border border-success">
+                            <i class="bi bi-check-circle-fill"></i> {{ guardia.estatus }}
+                        </span>
+                        {% elif guardia.estatus == 'Pendiente' %}
+                        <span class="badge badge-status bg-warning-subtle text-warning border border-warning">
+                            <i class="bi bi-clock-fill"></i> {{ guardia.estatus }}
+                        </span>
+                        {% else %}
+                        <span class="badge badge-status bg-danger-subtle text-danger border border-danger">
+                            <i class="bi bi-x-circle-fill"></i> {{ guardia.estatus }}
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'editar_guardia' guardia.id %}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-4 text-muted">No hay registros disponibles.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>

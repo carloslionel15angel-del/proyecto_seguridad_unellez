@@ -1,0 +1,79 @@
+{% extends 'seguridad_unellez/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    body {
+        background-image: url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop'); 
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+    }
+
+    .full-height-container {
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .card-custom {
+        background-color: rgba(255, 255, 255, 0.92); 
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        width: 100%;
+        max-width: 500px;
+        border: none;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+    }
+
+    .card-header {
+        background-color: #212529;
+        color: white;
+        border-radius: 20px 20px 0 0 !important;
+        padding: 20px;
+        border-bottom: 3px solid #ffc107;
+    }
+</style>
+
+<div class="full-height-container">
+    <div class="card card-custom">
+        <div class="card-header text-center">
+            <h3 class="mb-0"><i class="bi bi-shield-lock"></i> Registrar Guardia</h3>
+            <small class="text-warning">Control de Vigilancia UNELLEZ</small>
+        </div>
+        <div class="card-body p-4">
+            <form method="POST">
+                {% csrf_token %}
+
+                {% for field in formulario %}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-dark">{{ field.label }}</label>
+                        <div class="input-group">
+                            {{ field }}
+                        </div>
+                        {% if field.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ field.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-dark py-2 fw-bold">Guardar Registro</button>
+                    <a href="{% url 'lista_guardias' %}" class="btn btn-outline-secondary btn-sm">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('input, select').forEach(el => {
+        el.classList.add('form-control');
+    });
+</script>
+{% endblock %}

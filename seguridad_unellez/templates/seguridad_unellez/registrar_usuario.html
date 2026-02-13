@@ -1,0 +1,82 @@
+{% extends 'seguridad_unellez/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    body {
+        background-image: url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop'); 
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Contenedor que ocupa toda la altura de la pantalla y centra el contenido */
+    .full-height-container {
+        min-height: 100vh; /* 100% de la altura de la ventana */
+        display: flex;
+        justify-content: center; /* Centrado horizontal */
+        align-items: center;     /* Centrado vertical */
+        padding: 20px;
+    }
+
+    .card-custom {
+        background-color: rgba(255, 255, 255, 0.9); 
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        width: 100%;
+        max-width: 450px; /* Tamaño ideal para que no se vea muy ancha */
+        border: none;
+    }
+</style>
+
+<div class="full-height-container">
+    <div class="card card-custom shadow-lg">
+        <div class="card-header bg-dark text-white text-center py-3" style="border-radius: 15px 15px 0 0;">
+            <h4 class="mb-0">Registro de nuevo usuario</h4>
+        </div>
+        <div class="card-body p-4">
+            <form method="POST">
+                {% csrf_token %}
+
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">{{ field.label }}</label>
+                        <div class="input-group">
+                            {{ field }}
+                            {% if field.name == 'password' or field.name == 'password2' %}
+                                <button type="button" class="btn btn-outline-secondary toggle-password">
+                                    👁️
+                                </button>
+                            {% endif %}
+                        </div>
+                        {% if field.errors %}
+                            <div class="text-danger small mt-1">{{ field.errors }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <button type="submit" class="btn btn-dark w-100 py-2 mt-3">
+                    Crear usuario
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Esto asegura que los inputs de Django se vean como Bootstrap
+document.querySelectorAll('input').forEach(input => {
+    input.classList.add('form-control');
+});
+
+document.querySelectorAll('.toggle-password').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const input = btn.previousElementSibling;
+        input.type = input.type === 'password' ? 'text' : 'password';
+    });
+});
+</script>
+{% endblock %}
