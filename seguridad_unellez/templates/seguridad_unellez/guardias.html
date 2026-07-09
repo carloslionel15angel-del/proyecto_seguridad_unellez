@@ -1,0 +1,47 @@
+<div style="width: 80%; margin: 40px auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    <h3 style="text-align: center;">Estadísticas de Incidencias en Tiempo Real</h3>
+    <canvas id="graficaIncidencias" style="max-height: 400px;"></canvas>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    async function actualizarGrafica() {
+        try {
+            const response = await fetch('/api/incidencias-datos/');
+            const datos = await response.json();
+            
+            const etiquetas = datos.map(item => item.tipo);
+            const valores = datos.map(item => item.total);
+
+            const ctx = document.getElementById('graficaIncidencias').getContext('2d');
+            
+            // Si ya existe una gráfica, destrúyela antes de crear una nueva (evita errores al recargar)
+            if (window.miGrafica instanceof Chart) {
+                window.miGrafica.destroy();
+            }
+
+            window.miGrafica = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: etiquetas,
+                    datasets: [{
+                        label: 'Número de Incidencias',
+                        data: valores,
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        } catch (error) {
+            console.error("Error al cargar la gráfica:", error);
+        }
+    }
+
+    actualizarGrafica();
+    setInterval(actualizarGrafica, 30000);
+});
+</script>

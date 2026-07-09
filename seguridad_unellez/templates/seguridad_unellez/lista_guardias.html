@@ -6,75 +6,72 @@
     <title>Control de Guardias – UNELLEZ</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
-        .header { text-align: center; margin-bottom: 30px; }
+        .header { text-align: center; margin-bottom: 30px; position: relative; }
         .header img { width: 100px; margin-bottom: 10px; }
-        .card-stats { border: none; border-radius: 12px; transition: transform 0.3s; }
-        .card-stats:hover { transform: translateY(-5px); }
         .table-container { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        .badge-status { font-size: 0.85em; padding: 0.5em 1em; }
         .text-orange { color: #fd7e14; }
         .text-indigo { color: #6610f2; }
+        .logout-btn { position: absolute; top: 10px; right: 10px; }
     </style>
 </head>
 
 <body class="container py-5">
 
+    <div class="logout-btn">
+        <form action="{% url 'logout' %}" method="post" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+            </button>
+        </form>
+    </div>
+
     <div class="header">
         <img src="{% static 'seguridad_unellez/logo.png' %}" alt="Logo UNELLEZ">
         <h1 class="display-5 fw-bold">Sistema de Registro de Guardias de Seguridad – UNELLEZ</h1>
-        <p class="text-secondary">Monitoreo de Horas y Asistencia</p>
     </div>
 
-    <div class="row g-4 mb-5">
-        <div class="col-md-4">
-            <div class="card card-stats bg-white shadow-sm p-3 border-start border-primary border-5">
-                <div class="d-flex align-items-center">
-                    <div class="flex-shrink-0 bg-primary text-white rounded-circle p-3 me-3">
-                        <i class="bi bi-people-fill fs-3"></i>
-                    </div>
-                    <div>
-                        <h6 class="text-muted mb-0">Total Personal</h6>
-                        <span class="h4 fw-bold">{{ guardias.count }}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card card-stats bg-white shadow-sm p-3 border-start border-success border-5">
-                <div class="d-flex align-items-center">
-                    <div class="flex-shrink-0 bg-success text-white rounded-circle p-3 me-3">
-                        <i class="bi bi-clock-history fs-3"></i>
-                    </div>
-                    <div>
-                        <h6 class="text-muted mb-0">Estatus Activo</h6>
-                        <span class="h4 fw-bold">Oficiales Listos</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card card-stats bg-white shadow-sm p-3 border-start border-warning border-5">
-                <div class="d-flex align-items-center">
-                    <div class="flex-shrink-0 bg-warning text-white rounded-circle p-3 me-3">
-                        <i class="bi bi-calendar-check fs-3"></i>
-                    </div>
-                    <div>
-                        <h6 class="text-muted mb-0">Último Registro</h6>
-                        <span class="h4 fw-bold">Hoy</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="table-container">
+    <div class="table-container mb-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h3 class="mb-0">Registro de Asistencia</h3>
-            <a href="{% url 'crear_guardia' %}" class="btn btn-dark">
-                <i class="bi bi-plus-lg"></i> Nueva Guardia
-            </a>
+            <div class="d-flex gap-2">
+                <a href="{% url 'lista_negra' %}" class="btn btn-danger"><i class="bi bi-shield-lock-fill"></i> Lista Negra</a>
+                <a href="{% url 'panel_solicitudes_administrador' %}" class="btn btn-outline-primary"><i class="bi bi-envelope-paper-fill"></i> Solicitudes</a>
+                <a href="{% url 'registrar_incidencia' %}" class="btn btn-outline-danger"><i class="bi bi-exclamation-triangle-fill"></i> + Reportar Novedad</a>
+                <a href="{% url 'crear_guardia' %}" class="btn btn-dark"><i class="bi bi-plus-lg"></i> Nueva Guardia</a>
+            </div>
+        </div>
+        
+        <div class="card bg-light border-0 rounded-3 p-3 mb-4">
+            <form method="GET" action="{% url 'lista_guardias' %}" class="row g-3 align-items-center">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                        <input type="text" name="q" value="{{ request.GET.q|default:'' }}" class="form-control border-start-0 ps-0" placeholder="Buscar por nombre o cédula...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select name="area" class="form-select">
+                        <option value="">Todas las Áreas</option>
+                        <option value="Barinas 1" {% if request.GET.area == "Barinas 1" %}selected{% endif %}>Barinas 1</option>
+                        <option value="Barinas 2" {% if request.GET.area == "Barinas 2" %}selected{% endif %}>Barinas 2</option>
+                        <option value="Jardin Botánico" {% if request.GET.area == "Jardin Botánico" %}selected{% endif %}>Jardín Botánico</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select name="turno" class="form-select">
+                        <option value="">Todos los Turnos</option>
+                        <option value="diurno" {% if request.GET.turno == "diurno" %}selected{% endif %}>Diurno</option>
+                        <option value="nocturno" {% if request.GET.turno == "nocturno" %}selected{% endif %}>Nocturno</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-filter"></i> Filtrar</button>
+                </div>
+            </form>
         </div>
         
         <table class="table table-hover align-middle">
@@ -97,7 +94,7 @@
                     </td>
                     <td>{{ guardia.cedula }}</td>
                     <td>
-                        {% if 'Nocturno' in guardia.turno %}
+                        {% if 'nocturno' in guardia.turno|lower %}
                             <span class="text-indigo"><i class="bi bi-moon-stars-fill"></i> {{ guardia.turno }}</span>
                         {% else %}
                             <span class="text-orange"><i class="bi bi-sun-fill"></i> {{ guardia.turno }}</span>
@@ -110,34 +107,115 @@
                         <small class="text-muted">{{ guardia.dias_trabajados }} días / {{ guardia.horas_trabajadas }}h</small>
                     </td>
                     <td>
-                        {% if guardia.estatus == 'Activo' %}
-                        <span class="badge badge-status bg-success-subtle text-success border border-success">
-                            <i class="bi bi-check-circle-fill"></i> {{ guardia.estatus }}
-                        </span>
-                        {% elif guardia.estatus == 'Pendiente' %}
-                        <span class="badge badge-status bg-warning-subtle text-warning border border-warning">
-                            <i class="bi bi-clock-fill"></i> {{ guardia.estatus }}
-                        </span>
-                        {% else %}
-                        <span class="badge badge-status bg-danger-subtle text-danger border border-danger">
-                            <i class="bi bi-x-circle-fill"></i> {{ guardia.estatus }}
-                        </span>
-                        {% endif %}
+                        {% if guardia.esta_bloqueado %} <span class="badge bg-danger">Suspendido</span>
+                        {% else %} <span class="badge bg-success">{{ guardia.estatus }}</span> {% endif %}
                     </td>
                     <td>
-                        <a href="{% url 'editar_guardia' guardia.id %}" class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-pencil"></i>
-                        </a>
+                        <div class="btn-group">
+                            <a href="{% url 'editar_guardia' guardia.id %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                            <a href="{% url 'alternar_bloqueo_guardia' guardia.id %}" class="btn btn-sm {% if guardia.esta_bloqueado %}btn-outline-success{% else %}btn-outline-warning{% endif %}">
+                                <i class="bi {% if guardia.esta_bloqueado %}bi-unlock-fill{% else %}bi-lock-fill{% endif %}"></i>
+                            </a>
+                            <a href="{% url 'eliminar_guardia' guardia.id %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+                        </div>
                     </td>
                 </tr>
                 {% empty %}
-                <tr>
-                    <td colspan="6" class="text-center py-4 text-muted">No hay registros disponibles.</td>
-                </tr>
+                <tr><td colspan="6" class="text-center py-4">No se encontraron registros.</td></tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 
+    <!-- Sección de Gráfica -->
+    <div class="table-container mb-5">
+        <h3 class="mb-4 text-center">Incidencias Reportadas por Tipo</h3>
+        <canvas id="graficaIncidencias" style="max-height: 300px;"></canvas>
+    </div>
+
+    <!-- Sección de Bitácora de Novedades -->
+    <div class="table-container mb-5">
+        <h3 class="mb-4 text-center"><i class="bi bi-list-check"></i> Bitácora de Novedades Recientes</h3>
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Fecha</th>
+                    <th>Oficial</th>
+                    <th>Tipo</th>
+                    <th>Área</th>
+                    <th>Descripción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for incidencia in incidencias %}
+                <tr>
+                    <td>{{ incidencia.creado_en|date:"d/m/Y H:i" }}</td>
+                    <td>{{ incidencia.guardia.nombre }}</td>
+                    <td><span class="badge bg-warning text-dark">{{ incidencia.tipo }}</span></td>
+                    <td>{{ incidencia.area_suceso }}</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none" data-bs-toggle="modal" data-bs-target="#modalIncidencia{{ incidencia.id }}">
+                            {{ incidencia.descripcion|truncatechars:50 }}
+                        </button>
+                    </td>
+                </tr>
+
+                <!-- Modal para cada incidencia -->
+                <div class="modal fade" id="modalIncidencia{{ incidencia.id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title"><i class="bi bi-info-circle"></i> Detalle de Novedad</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p><strong>Fecha:</strong> {{ incidencia.creado_en|date:"d/m/Y H:i" }}</p>
+                                <p><strong>Oficial:</strong> {{ incidencia.guardia.nombre }}</p>
+                                <p><strong>Tipo:</strong> {{ incidencia.tipo }}</p>
+                                <hr>
+                                <p><strong>Descripción completa:</strong></p>
+                                <p>{{ incidencia.descripcion }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <tr><td colspan="5" class="text-center">No hay reportes recientes.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Scripts necesarios (Bootstrap Bundle incluye Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        async function actualizarGrafica() {
+            try {
+                const response = await fetch('/api/incidencias-datos/');
+                const datos = await response.json();
+                const etiquetas = datos.map(item => item.tipo);
+                const valores = datos.map(item => item.total);
+                const ctx = document.getElementById('graficaIncidencias').getContext('2d');
+                
+                if (window.miGrafica instanceof Chart) window.miGrafica.destroy();
+                window.miGrafica = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: etiquetas,
+                        datasets: [{
+                            label: 'Total de Incidencias',
+                            data: valores,
+                            backgroundColor: '#3b82f6'
+                        }]
+                    },
+                    options: { responsive: true, scales: { y: { beginAtZero: true } } }
+                });
+            } catch (error) { console.error("Error al cargar gráfica:", error); }
+        }
+        actualizarGrafica();
+        setInterval(actualizarGrafica, 30000);
+    });
+    </script>
 </body>
 </html>

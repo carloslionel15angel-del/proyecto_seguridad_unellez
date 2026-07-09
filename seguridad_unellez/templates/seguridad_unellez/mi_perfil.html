@@ -1,0 +1,370 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel del Oficial – UNELLEZ</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; overflow-x: hidden; }
+        
+        /* Estilos de la Barra Lateral Administrativa */
+        .sidebar { height: 100vh; width: 260px; position: fixed; top: 0; left: 0; background: #212529; color: white; padding-top: 20px; z-index: 1000; }
+        .sidebar .brand { text-align: center; padding: 10px 20px; border-bottom: 1px solid #343a40; margin-bottom: 20px; }
+        .sidebar .brand img { width: 60px; }
+        .sidebar a { padding: 12px 20px; text-decoration: none; font-size: 1rem; color: #adbcbc; display: block; transition: all 0.3s; }
+        .sidebar a:hover, .sidebar a.active { background: #2c3034; color: #fff; border-left: 4px solid #fd7e14; }
+        
+        /* Área de Contenido Principal */
+        .main-content { margin-left: 260px; padding: 40px; }
+        
+        .profile-card, .data-card, .stat-card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: none; }
+        .stat-card { transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-3px); }
+        .badge-status { font-size: 0.85em; padding: 0.5em 1em; }
+        .text-orange { color: #fd7e14; }
+        .text-indigo { color: #6610f2; }
+
+        /* 🖼️ EFECTO HOVER PARA LA FOTO DE PERFIL INTERACTIVA */
+        .base-avatar:hover .hover-overlay { opacity: 1 !important; }
+        
+        /* Estilo personalizado para la previsualización de imágenes */
+        .preview-container {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px dashed #ccc;
+            margin: 0 auto 15px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+        }
+        .preview-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- BARRA LATERAL -->
+    <div class="sidebar d-flex flex-column justify-content-between">
+        <div>
+            <div class="brand">
+                <img src="{% static 'seguridad_unellez/logo.png' %}" alt="Logo UNELLEZ" class="mb-2">
+                <h6 class="text-white fw-bold mb-0 small">SEGURIDAD UNELLEZ</h6>
+            </div>
+            <p class="text-muted px-4 small uppercase fw-bold mb-2" style="letter-spacing: 1px;">Mi Espacio</p>
+            <a href="{% url 'mi_perfil' %}" class="active"><i class="bi bi-person-vcard me-2"></i> Mi Perfil</a>
+            <a href="{% url 'registrar_incidencia' %}"><i class="bi bi-exclamation-triangle me-2"></i> Reportar Novedad</a>
+            
+            <!-- 📄 BOTÓN DE SOLICITUDES ADMINISTRATIVAS (VACACIONES, PERMISOS, ETC.) -->
+            <a href="{% url 'mis_solicitudes' %}"><i class="bi bi-folder-symlink me-2"></i> Mis Solicitudes</a>
+        </div>
+        <div class="p-3">
+            <hr class="text-muted">
+            <form action="{% url 'logout' %}" method="post" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-link text-danger p-2 small text-decoration-none w-100 text-start">
+                    <i class="bi bi-box-arrow-left me-2"></i> Cerrar Sesión
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="main-content">
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm mb-4" role="alert">
+                    <i class="bi bi-info-circle-fill me-2"></i> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="d-flex justify-content-between align-items-center mb-4 row g-3">
+            <div class="col-md-7">
+                <h1 class="h3 fw-bold mb-0">Panel Operativo del Oficial</h1>
+                <p class="text-secondary small mb-0">Gestión de asignación individual y novedades de guardia.</p>
+            </div>
+            <div class="col-md-5 text-md-end d-flex align-items-center justify-content-md-end gap-3 flex-wrap">
+                {% if guardia %}
+                    {% if 'Nocturno' in guardia.turno or 'nocturno' in guardia.turno %}
+                        <span class="text-dark bg-dark-subtle px-3 py-2 rounded-3 small fw-semibold border"><i class="bi bi-clock-history text-indigo"></i> Cobertura: 18:00 a 06:00</span>
+                    {% else %}
+                        <span class="text-dark bg-warning-subtle px-3 py-2 rounded-3 small fw-semibold border"><i class="bi bi-clock-history text-orange"></i> Cobertura: 06:00 a 18:00</span>
+                    {% endif %}
+                    
+                    <a href="{% url 'descargar_ficha_pdf' %}" class="btn btn-outline-dark fw-semibold shadow-sm btn-sm py-2 px-3">
+                        <i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> Descargar Ficha
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if guardia %}
+        <!-- FICHA DE PERFIL -->
+        <div class="profile-card mb-4">
+            <div class="row align-items-center">
+                
+                <!-- Contenedor Foto de Perfil Interactiva -->
+                <div class="col-md-2 text-center text-md-start mb-3 mb-md-0">
+                    <div class="position-relative d-inline-block rounded-circle overflow-hidden base-avatar border" 
+                         style="cursor: pointer; width: 100px; height: 100px; box-shadow: 0 4px 10px rgba(0,0,0,0.08);" 
+                         data-bs-toggle="modal" data-bs-target="#modalFotoPerfil" 
+                         title="Haz clic aquí para cambiar tu foto de perfil">
+                        
+                        {% if guardia.foto %}
+                            <img src="{{ guardia.foto.url }}" alt="Foto de {{ guardia.nombre }}" 
+                                 class="w-100 h-100" 
+                                 style="object-fit: cover;">
+                        {% else %}
+                            <div class="bg-light text-dark w-100 h-100 d-flex align-items-center justify-content-center" 
+                                 style="border: 2px dashed #ccc !important;">
+                                <i class="bi bi-camera-fill fs-2 text-secondary"></i>
+                            </div>
+                        {% endif %}
+
+                        <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-50 opacity-0 hover-overlay" 
+                             style="transition: opacity 0.2s ease-in-out; border-radius: 50%;">
+                            <i class="bi bi-pencil-square text-white fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información Básica -->
+                <div class="col-md-6">
+                    <h3 class="fw-bold mb-1 text-dark text-capitalize">{{ guardia.nombre }}</h3>
+                    <p class="text-muted mb-2 small"><i class="bi bi-card-text"></i> Cédula: {{ guardia.cedula }}</p>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <span class="badge bg-dark-subtle text-dark border"><i class="bi bi-geo-alt"></i> {{ guardia.area_asignada }}</span>
+                    </div>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <span class="d-block text-muted small mb-1">Estatus del Funcionario</span>
+                    {% if guardia.estatus == 'Activo' %}
+                        <span class="badge badge-status bg-success-subtle text-success border border-success">
+                            <i class="bi bi-circle-fill fs-6 small me-1"></i> {{ guardia.estatus }}
+                        </span>
+                    {% else %}
+                        <span class="badge badge-status bg-warning-subtle text-warning border border-warning">
+                            <i class="bi bi-clock-fill me-1"></i> {{ guardia.estatus }}
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Alertas Informativas de Turnos -->
+            <div class="mt-4">
+                {% if 'Nocturno' in guardia.turno or 'nocturno' in guardia.turno %}
+                    <div class="alert alert-info border border-info-subtle d-flex align-items-center shadow-sm mb-0" role="alert" style="border-radius: 12px;">
+                        <i class="bi bi-moon-stars-fill fs-3 me-3 text-indigo"></i>
+                        <div>
+                            <h6 class="alert-heading fw-bold mb-1 text-dark">Turno Nocturno Activo</h6>
+                            <p class="mb-0 small text-secondary">
+                                Tu bloque de coverage establecido es desde las <b>18:00 h</b> hasta las <b>06:00 h</b> en el sector asignado: <span class="badge bg-dark-subtle text-dark">{{ guardia.area_asignada }}</span>.
+                            </p>
+                        </div>
+                    </div>
+                {% elif 'Diurno' in guardia.turno or 'diurno' in guardia.turno %}
+                    <div class="alert alert-warning border border-warning-subtle d-flex align-items-center shadow-sm mb-0" role="alert" style="border-radius: 12px;">
+                        <i class="bi bi-sun-fill fs-3 me-3 text-orange"></i>
+                        <div>
+                            <h6 class="alert-heading fw-bold mb-1 text-dark">Turno Diurno Activo</h6>
+                            <p class="mb-0 small text-secondary">
+                                Tu bloque de coverage establecido es desde las <b>06:00 h</b> hasta las <b>18:00 h</b> en el sector asignado: <span class="badge bg-dark-subtle text-dark">{{ guardia.area_asignada }}</span>.
+                            </p>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="alert alert-secondary border border-secondary-subtle d-flex align-items-center shadow-sm mb-0" role="alert" style="border-radius: 12px;">
+                        <i class="bi bi-clock-history fs-3 me-3 text-secondary"></i>
+                        <div>
+                            <h6 class="alert-heading fw-bold mb-1 text-dark">Turno: {{ guardia.turno }}</h6>
+                            <p class="mb-0 small text-secondary">
+                                Horario de coverage general o rotativo a coordinar con el supervisor del cuadrante. Área: <span class="badge bg-dark-subtle text-dark">{{ guardia.area_asignada }}</span>.
+                            </p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <hr class="my-4">
+
+            <!-- Horas de Progreso -->
+            <div class="row align-items-center">
+                <div class="col-md-4">
+                    <h6 class="mb-1 fw-bold text-secondary">Registro de Horas Acumuladas</h6>
+                    <span class="h4 fw-bold text-dark">{{ guardia.horas_trabajadas }}h</span> 
+                    <span class="text-muted small">/ {{ guardia.dias_trabajados }} días laborados</span>
+                </div>
+                <div class="col-md-8">
+                    <div class="progress style-progress" style="height: 12px; border-radius: 6px; background-color: #e9ecef;">
+                        <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" style="width: {% if guardia.horas_trabajadas > 100 %}100{% else %}{{ guardia.horas_trabajadas }}{% endif %}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TARJETAS DE ESTADÍSTICAS -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-4">
+                <div class="stat-card p-3 rounded-3 text-center border bg-white shadow-sm">
+                    <i class="bi bi-exclamation-octagon-fill text-danger fs-3 mb-1 d-block"></i>
+                    <span class="text-muted small fw-semibold d-block">Robos / Hurtos</span>
+                    <span class="fs-3 fw-bold text-dark">{{ conteo_robos }}</span>
+                </div>
+            </div>
+            <div class="col-6 col-md-4">
+                <div class="stat-card p-3 rounded-3 text-center border bg-white shadow-sm">
+                    <i class="bi bi-cone-striped text-warning fs-3 mb-1 d-block"></i>
+                    <span class="text-muted small fw-semibold d-block">Fallas Infraestructura</span>
+                    <span class="fs-3 fw-bold text-dark">{{ conteo_fallas }}</span>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="stat-card p-3 rounded-3 text-center border bg-white shadow-sm">
+                    <i class="bi bi-journal-text text-secondary fs-3 mb-1 d-block"></i>
+                    <span class="text-muted small fw-semibold d-block">Otras Novedades</span>
+                    <span class="fs-3 fw-bold text-dark">{{ conteo_otros }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- TABLA DE HISTORIAL INDIVIDUAL -->
+        <div class="data-card">
+            <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-list-task text-danger me-2"></i>Historial Reciente de Mis Reportes</h5>
+            <div class="table-responsive">
+                <table class="table align-middle table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Fecha y Hora</th>
+                            <th>Tipo de Suceso</th>
+                            <th>Descripción / Bitácora</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for incidencia in mis_incidencias %}
+                        <tr>
+                            <td class="text-muted small">{{ incidencia.fecha_hora|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                {% if incidencia.tipo == 'ROBO' or incidencia.tipo == 'ALTERCADO' %}
+                                    <span class="badge bg-danger-subtle text-danger border border-danger small">
+                                        {{ incidencia.get_tipo_display|default:incidencia.tipo }}
+                                    </span>
+                                {% elif incidencia.tipo == 'FALLA' %}
+                                    <span class="badge bg-warning-subtle text-warning border border-warning small">
+                                        {{ incidencia.get_tipo_display|default:incidencia.tipo }}
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary small">
+                                        {{ incidencia.get_tipo_display|default:incidencia.tipo }}
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="text-secondary small">{{ incidencia.descripcion }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted py-4 small">No has reportado ninguna novedad técnica o de seguridad en este ciclo.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% else %}
+        <!-- Mensaje de error si la cuenta Django no está asociada a ningún Oficial -->
+        <div class="alert alert-warning border border-warning shadow-sm" role="alert">
+            <h5 class="alert-heading fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i>Usuario de Sistema sin Vinculación</h5>
+            <p class="mb-0">Tu cuenta no posee un registro físico de Guardia de Seguridad asignado. Solicita al supervisor del sistema que asigne tu usuario de Django a tu ficha técnica desde el panel de administración.</p>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <!-- MODAL PARA ACTUALIZAR FOTO DE PERFIL -->
+    <div class="modal fade" id="modalFotoPerfil" tabindex="-1" aria-labelledby="modalFotoPerfilLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="modalFotoPerfilLabel"><i class="bi bi-camera me-2 text-orange"></i>Actualizar Foto de Perfil</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{% url 'actualizar_foto_perfil' %}" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="modal-body py-4">
+                        <p class="text-secondary small mb-3">Selecciona una fotografía tuya en formato JPG o PNG para tu identificación en los reportes de seguridad del cuadrante.</p>
+                        
+                        <!-- 👁️ CONTENEDOR DE PREVISUALIZACIÓN EN TIEMPO REAL -->
+                        <div class="preview-container d-none" id="previewBox">
+                            <img src="" id="imagePreview" alt="Previsualización">
+                        </div>
+
+                        <div class="input-group">
+                            <input type="file" class="form-control" id="inputFoto" name="foto" accept="image/*" required>
+                        </div>
+                        <div id="fileError" class="text-danger small mt-2 d-none">El archivo seleccionado no es válido o supera el límite de tamaño permitido (2MB).</div>
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-light fw-semibold" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-dark fw-semibold px-4" id="btnGuardarFoto">Guardar Foto</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // LÓGICA DE VALIDACIÓN Y PREVISUALIZACIÓN DE IMÁGENES EN TIEMPO REAL
+        document.getElementById('inputFoto').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            const previewBox = document.getElementById('previewBox');
+            const imagePreview = document.getElementById('imagePreview');
+            const fileError = document.getElementById('fileError');
+            const btnGuardar = document.getElementById('btnGuardarFoto');
+
+            if (file) {
+                // Validar que sea una imagen válida y su tamaño (Máximo 2MB)
+                const isValidImage = file.type.startsWith('image/');
+                const isUnderLimit = file.size <= 2 * 1024 * 1024; 
+
+                if (!isValidImage || !isUnderLimit) {
+                    fileError.classList.remove('d-none');
+                    previewBox.classList.add('d-none');
+                    btnGuardar.disabled = true;
+                    event.target.value = ''; // Limpiar el input
+                    return;
+                }
+
+                // Si pasa las validaciones, mostrar la previsualización usando FileReader
+                fileError.classList.add('d-none');
+                btnGuardar.disabled = false;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    previewBox.classList.remove('d-none');
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Limpiar previsualización al cerrar el modal si no se guardó
+        document.getElementById('modalFotoPerfil').addEventListener('hidden.bs.modal', function () {
+            document.getElementById('previewBox').classList.add('d-none');
+            document.getElementById('imagePreview').src = '';
+            document.getElementById('fileError').classList.add('d-none');
+            document.getElementById('inputFoto').value = '';
+            document.getElementById('btnGuardarFoto').disabled = false;
+        });
+    </script>
+</body>
+</html>

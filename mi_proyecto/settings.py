@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 
 # Directorio Base
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -31,13 +32,15 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'mi_proyecto.urls'
 
+# CONFIGURACIÓN DE PLANTILLAS
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'seguridad_unellez' / 'templates'],
-        'APP_DIRS': True,
+        'DIRS': [], # Django buscará en las carpetas 'templates' de cada app automáticamente
+        'APP_DIRS': True, # Esto es lo que permite usar 'seguridad_unellez/templates/'
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -70,19 +73,22 @@ TIME_ZONE = 'America/Caracas'
 USE_I18N = True
 USE_TZ = True
 
-# Archivos estáticos
+# Archivos estáticos y multimedia
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# =============================================================================
-# CONFIGURACIONES DE AUTENTICACIÓN Y MENSAJES
-# =============================================================================
-
+# Configuración de Login
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'lista_guardias'
 LOGOUT_REDIRECT_URL = 'login'
 
-# Estilos para que los mensajes de Django coincidan con CSS/Bootstrap
+# Estilos de mensajes
 from django.contrib.messages import constants as messages
 MESSAGE_TAGS = {
     messages.DEBUG: 'secondary',
@@ -92,20 +98,14 @@ MESSAGE_TAGS = {
     messages.ERROR: 'danger',
 }
 
-# =============================================================================
-# CONFIGURACIÓN DE CORREO (GMAIL SMTP)
-# =============================================================================
-
+# Configuración de Correo
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'carloslionel15angel@gmail.com'
-EMAIL_HOST_PASSWORD = 'odoe mrek aeym fhtz'  
+EMAIL_HOST_PASSWORD = 'odoe mrek aeym fhtz' 
 DEFAULT_FROM_EMAIL = f'Seguridad UNELLEZ <{EMAIL_HOST_USER}>'
 
-# Seguridad de Tokens (4 horas de duración)
 PASSWORD_RESET_TIMEOUT = 14400 
-
-# Evita conflictos con pre-escaneo de enlaces en el navegador
 SECURE_CROSS_ORIGIN_OPENER_POLICY = None

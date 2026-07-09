@@ -1,0 +1,188 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Solicitudes - SEGURIDAD UNELLEZ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 font-sans antialiased text-gray-800">
+
+    <div class="flex min-h-screen">
+        <aside class="w-64 bg-[#1E1E2F] text-white flex flex-col justify-between p-4 shadow-xl z-10">
+            <div>
+                <div class="flex flex-col items-center py-6 border-b border-gray-700 mb-6">
+                    <img src="https://i.imgur.com/8Y6D8bA.png" alt="Logo UNELLEZ" class="h-14 mb-3 object-contain">
+                    <span class="text-sm font-bold tracking-wider text-amber-500 text-center">SEGURIDAD UNELLEZ</span>
+                </div>
+                
+                <nav class="space-y-2">
+                    <a href="{% url 'mi_perfil' %}" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-all duration-200">
+                        <i class="fa-solid fa-user-shield text-lg"></i>
+                        <span class="font-medium">Mi Perfil</span>
+                    </a>
+                    <a href="{% url 'mis_solicitudes' %}" class="flex items-center space-x-3 px-4 py-3 rounded-lg bg-amber-500 text-white shadow-md shadow-amber-500/20 transition-all duration-200">
+                        <i class="fa-solid fa-calendar-check text-lg"></i>
+                        <span class="font-medium">Mis Solicitudes</span>
+                    </a>
+                    <a href="{% url 'registrar_incidencia' %}" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-all duration-200">
+                        <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+                        <span class="font-medium">Reportar Novedad</span>
+                    </a>
+                </nav>
+            </div>
+
+            <div class="pt-4 border-t border-gray-700">
+                <form action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all duration-200 text-left">
+                        <i class="fa-solid fa-right-from-bracket text-lg"></i>
+                        <span class="font-medium">Cerrar Sesión</span>
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <main class="flex-1 p-8 overflow-y-auto">
+            <div class="flex justify-between items-center mb-8 border-b pb-4 border-gray-200">
+                <div>
+                    <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Buzón de Gestión Personal</h1>
+                    <p class="text-gray-500 mt-1">Historial y control individual de permisos, vacaciones y requerimientos.</p>
+                </div>
+                <a href="{% url 'crear_solicitud' %}" class="inline-flex items-center space-x-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold px-5 py-2.5 rounded-xl shadow-lg transition-all duration-200 hover:-translate-y-0.5">
+                    <i class="fa-solid fa-plus text-sm text-amber-400"></i>
+                    <span>Nueva Solicitud</span>
+                </a>
+            </div>
+
+            {% if messages %}
+                <div class="mb-6 space-y-2">
+                    {% for message in messages %}
+                        <div class="p-4 rounded-xl flex items-center space-x-3 shadow-sm border {% if message.tags == 'success' %} bg-emerald-50 border-emerald-200 text-emerald-800 {% else %} bg-amber-50 border-amber-200 text-amber-800 {% endif %}">
+                            <i class="fa-solid {% if message.tags == 'success' %} fa-circle-check {% else %} fa-circle-exclamation {% endif %} text-lg"></i>
+                            <p class="font-medium text-sm">{{ message }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-6 bg-gray-50/75 border-b border-gray-100 flex justify-between items-center">
+                    <h2 class="font-bold text-gray-800 text-lg flex items-center space-x-2">
+                        <i class="fa-solid fa-clock-history text-amber-500"></i>
+                        <span>Cronograma de Peticiones</span>
+                    </h2>
+                    <span class="text-xs bg-gray-200 text-gray-700 px-3 py-1 rounded-full font-semibold">Total: {{ solicitudes_historial.count }}</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-100/50 text-gray-500 text-xs font-bold uppercase tracking-wider border-b border-gray-100">
+                                <th class="py-4 px-6">Tipo de Solicitud</th>
+                                <th class="py-4 px-6">Descripción / Motivo</th>
+                                <th class="py-4 px-6">Fecha de Creación</th>
+                                <th class="py-4 px-6 text-center">Estatus</th>
+                                <th class="py-4 px-6">Respuesta de Supervisión</th>
+                                <th class="py-4 px-6 text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 text-sm">
+                            {% for solicitud in solicitudes_historial %}
+                                <tr class="hover:bg-gray-50/70 transition-colors duration-150">
+                                    <td class="py-4 px-6 font-bold text-slate-900 whitespace-nowrap">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="p-2 rounded-lg bg-gray-100 text-slate-700">
+                                                {% if solicitud.tipo == 'VACACIONES' %}
+                                                    <i class="fa-solid fa-umbrella-beach text-sky-500"></i>
+                                                {% elif solicitud.tipo == 'PERMISO' %}
+                                                    <i class="fa-solid fa-house-medical text-emerald-500"></i>
+                                                {% elif solicitud.tipo == 'CAMBIO_TURNO' %}
+                                                    <i class="fa-solid fa-repeat text-amber-500"></i>
+                                                {% else %}
+                                                    <i class="fa-solid fa-shirt text-purple-500"></i>
+                                                {% endif %}
+                                            </div>
+                                            <span>{{ solicitud.get_tipo_display }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-6 text-gray-600 min-w-[250px]">
+                                        <p class="line-clamp-2 text-xs leading-relaxed italic">
+                                            {% if solicitud.descripcion %}
+                                                "{{ solicitud.descripcion }}"
+                                            {% elif solicitud.motivo %}
+                                                "{{ solicitud.motivo }}"
+                                            {% elif solicitud.justificacion %}
+                                                "{{ solicitud.justificacion }}"
+                                            {% else %}
+                                                <span class="text-gray-400 not-italic">Sin descripción.</span>
+                                            {% endif %}
+                                        </p>
+                                    </td>
+                                    <td class="py-4 px-6 text-gray-500 whitespace-nowrap text-xs">
+                                        <i class="fa-regular fa-calendar-days mr-1.5 text-gray-400"></i>
+                                        {{ solicitud.creado_en|date:"d/m/Y - h:i a" }}
+                                    </td>
+                                    <td class="py-4 px-6 text-center whitespace-nowrap">
+                                        {% if solicitud.estado == 'PENDIENTE' %}
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                                                <span class="h-1.5 w-1.5 rounded-full bg-amber-500 mr-2 animate-pulse"></span>
+                                                Pendiente
+                                            </span>
+                                        {% elif solicitud.estado == 'APROBADA' %}
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                                <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 mr-2"></span>
+                                                Aprobada
+                                            </span>
+                                        {% else %}
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                                                <span class="h-1.5 w-1.5 rounded-full bg-rose-500 mr-2"></span>
+                                                Rechazada
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="py-4 px-6 text-xs text-gray-500">
+                                        {% if solicitud.respuesta_supervisor %}
+                                            <div class="bg-gray-50 p-2 rounded-lg border border-gray-100 italic">
+                                                "{{ solicitud.respuesta_supervisor }}"
+                                            </div>
+                                        {% else %}
+                                            <span class="text-gray-400 italic flex items-center">
+                                                <i class="fa-solid fa-user-clock mr-1 text-gray-300"></i>
+                                                Esperando revisión...
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <!-- COLUMNA DE ACCIONES ADICIONADA -->
+                                    <td class="py-4 px-6 text-center whitespace-nowrap">
+                                        {% if solicitud.estado == 'APROBADA' %}
+                                            <a href="{% url 'descargar_aprobacion_pdf' solicitud.id %}" class="inline-flex items-center space-x-1 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-3 py-1.5 rounded-lg transition-colors shadow-sm">
+                                                <i class="fa-solid fa-file-pdf"></i>
+                                                <span>PDF</span>
+                                            </a>
+                                        {% else %}
+                                            <span class="text-gray-400 text-xs italic">-</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="py-12 text-center text-gray-400 bg-gray-50/30">
+                                        <div class="flex flex-col items-center justify-center space-y-3">
+                                            <i class="fa-solid fa-folder-open text-4xl text-gray-300"></i>
+                                            <p class="text-sm font-medium">No has registrado ninguna solicitud en este ciclo operativo.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+</body>
+</html>
