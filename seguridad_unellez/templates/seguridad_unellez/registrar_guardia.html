@@ -3,7 +3,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Registrar Guardia - UNELLEZ</title>
+    <title>{% if guardia %}Editar Guardia{% else %}Registrar Guardia{% endif %} - UNELLEZ</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
@@ -15,28 +15,28 @@
 
     <div class="form-card">
         <div class="text-center mb-4">
-            <h2 class="fw-bold text-primary">Registrar Nuevo Guardia</h2>
+            <h2 class="fw-bold text-primary">{% if guardia %}Editar Registro{% else %}Registrar Nuevo Guardia{% endif %}</h2>
             <p class="text-muted">Control de Vigilancia UNELLEZ</p>
         </div>
 
-        <form method="POST">
+        <form method="POST" action="">
             {% csrf_token %}
             
             <div class="mb-3">
                 <label class="form-label fw-bold">Nombre Completo</label>
-                <input type="text" name="nombre" class="form-control" required placeholder="Nombre del oficial">
+                <input type="text" name="nombre" class="form-control" required placeholder="Nombre del oficial" value="{{ guardia.nombre }}">
             </div>
 
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label fw-bold">Cédula</label>
-                    <input type="text" name="cedula" class="form-control" required placeholder="Ej: V-12345678">
+                    <input type="text" name="cedula" class="form-control" required placeholder="Ej: V-12345678" value="{{ guardia.cedula }}">
                 </div>
                 <div class="col-md-6 mb-3">
                     <label class="form-label fw-bold">Turno</label>
                     <select name="turno" class="form-select">
-                        <option value="diurno">Diurno</option>
-                        <option value="nocturno">Nocturno</option>
+                        <option value="diurno" {% if guardia.turno == 'diurno' %}selected{% endif %}>Diurno</option>
+                        <option value="nocturno" {% if guardia.turno == 'nocturno' %}selected{% endif %}>Nocturno</option>
                     </select>
                 </div>
             </div>
@@ -44,11 +44,11 @@
             <div class="mb-4">
                 <label class="form-label fw-bold">Área Asignada</label>
                 <select name="area" class="form-select">
-                    <option value="Barinas 1">Barinas 1</option>
-                    <option value="Barinas 2">Barinas 2</option>
-                    <option value="Jardin Botánico">Jardín Botánico</option>
-                    <option value="Arse">Arse</option>
-                    <option value="Pabellón III">Pabellón III</option>
+                    <option value="Barinas 1" {% if guardia.area_asignada == 'Barinas 1' %}selected{% endif %}>Barinas 1</option>
+                    <option value="Barinas 2" {% if guardia.area_asignada == 'Barinas 2' %}selected{% endif %}>Barinas 2</option>
+                    <option value="Jardin Botánico" {% if guardia.area_asignada == 'Jardin Botánico' %}selected{% endif %}>Jardín Botánico</option>
+                    <option value="Arse" {% if guardia.area_asignada == 'Arse' %}selected{% endif %}>Arse</option>
+                    <option value="Pabellón III" {% if guardia.area_asignada == 'Pabellón III' %}selected{% endif %}>Pabellón III</option>
                 </select>
             </div>
 

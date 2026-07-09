@@ -8,7 +8,7 @@ from django.db.models import Count, Q
 from django.core.exceptions import PermissionDenied
 from functools import wraps
 from .models import Guardia, Solicitud, Incidencia
-from .forms import GuardiaForm, RegistroUsuarioForm, IncidenciaForm, SolicitudForm, RegistroGuardiaForm # 🌟 Importamos el nuevo formulario
+from .forms import GuardiaForm, RegistroUsuarioForm, IncidenciaForm, SolicitudForm, RegistroGuardiaForm
 
 # =========================================================================
 # DECORADOR DE PROTECCIÓN
@@ -56,7 +56,6 @@ def login_view(request):
         form = AuthenticationForm()
     return render(request, 'seguridad_unellez/login.html', {'form': form})
 
-# 🌟 VISTA ACTUALIZADA PARA REGISTRO FUNCIONAL
 def registrar_usuario(request):
     if request.method == 'POST':
         form = RegistroGuardiaForm(request.POST)
@@ -173,6 +172,15 @@ def crear_guardia(request):
 @login_required
 def editar_guardia(request, id):
     guardia = get_object_or_404(Guardia, id=id)
+    if request.method == 'POST':
+        # Procesamiento manual para evitar problemas con el formulario manual en HTML
+        guardia.nombre = request.POST.get('nombre')
+        guardia.cedula = request.POST.get('cedula')
+        guardia.turno = request.POST.get('turno')
+        guardia.area_asignada = request.POST.get('area')
+        guardia.save()
+        messages.success(request, "Guardia actualizado correctamente.")
+        return redirect('lista_guardias')
     return render(request, 'seguridad_unellez/registrar_guardia.html', {'guardia': guardia})
 
 @login_required
