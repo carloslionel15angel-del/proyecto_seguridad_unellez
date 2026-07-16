@@ -7,6 +7,8 @@ class GuardiaForm(forms.ModelForm):
         model = Guardia
         fields = [
             'nombre', 
+            'apellido',
+            'email',
             'cedula', 
             'turno', 
             'area_asignada', 
@@ -17,6 +19,8 @@ class GuardiaForm(forms.ModelForm):
         
         labels = {
             'nombre': 'Nombre completo',
+            'apellido': 'Apellidos',
+            'email': 'Correo electrónico',
             'cedula': 'Cédula',
             'turno': 'Turno de guardia',
             'area_asignada': 'Área asignada',
@@ -26,7 +30,9 @@ class GuardiaForm(forms.ModelForm):
         }
         
         widgets = {
-            'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej. Brayan Gonzalez'}),
+            'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej. Brayan'}),
+            'apellido': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej. Gonzalez'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'ejemplo@unellez.edu.ve'}),
             'cedula': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej. 24256265'}),
             'turno': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej. Nocturno'}),
             'area_asignada': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej. Laboratorios'}),
@@ -62,10 +68,7 @@ class RegistroUsuarioForm(forms.ModelForm):
             'email': 'Correo electrónico',
         }
         widgets = {
-            'username': forms.TextInput(attrs={
-                'class': 'form-control',
-                'autocomplete': 'new-password' 
-            }),
+            'username': forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'new-password'}),
             'first_name': forms.TextInput(attrs={'class': 'form-control'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
@@ -81,7 +84,6 @@ class RegistroUsuarioForm(forms.ModelForm):
         return cleaned_data
 
 
-# 🔥 FORMULARIO PARA EL MÓDULO DE INCIDENCIAS
 class IncidenciaForm(forms.ModelForm):
     class Meta:
         model = Incidencia
@@ -97,12 +99,11 @@ class IncidenciaForm(forms.ModelForm):
             'descripcion': forms.Textarea(attrs={
                 'class': 'form-control', 
                 'rows': 4, 
-                'placeholder': 'Describa detalladamente los hechos, bienes afectados, condiciones, etc...'
+                'placeholder': 'Describa detalladamente los hechos...'
             }),
         }
 
 
-# 📅 NUEVO FORMULARIO: GESTIÓN DE SOLICITUDES (VACACIONES / PERMISOS)
 class SolicitudForm(forms.ModelForm):
     class Meta:
         model = Solicitud
@@ -120,34 +121,36 @@ class SolicitudForm(forms.ModelForm):
             'motivo': forms.Textarea(attrs={
                 'class': 'form-control', 
                 'rows': 4, 
-                'placeholder': 'Explique de forma detallada el motivo de su solicitud o el cambio requerido...'
+                'placeholder': 'Explique el motivo...'
             }),
         }
 
-# ==========================================================
-# AGREGADO: Formulario para Registro de Nuevo Guardia/Usuario
-# ==========================================================
 class RegistroGuardiaForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    username = forms.CharField(label="Nombre de Usuario", widget=forms.TextInput(attrs={'class': 'form-control'}))
     
     class Meta:
         model = Guardia
-        fields = ['nombre', 'cedula', 'area_asignada', 'turno']
+        fields = ['nombre', 'apellido', 'email', 'cedula', 'area_asignada', 'turno']
         widgets = {
             'nombre': forms.TextInput(attrs={'class': 'form-control'}),
+            'apellido': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
             'cedula': forms.TextInput(attrs={'class': 'form-control'}),
             'area_asignada': forms.TextInput(attrs={'class': 'form-control'}),
             'turno': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
     def save(self, commit=True):
-        # Crea el usuario en el sistema usando la cédula como usuario
         user = User.objects.create_user(
-            username=self.cleaned_data['cedula'], 
-            password=self.cleaned_data['password']
+            username=self.cleaned_data['username'], 
+            password=self.cleaned_data['password'],
+            email=self.cleaned_data['email'],
+            first_name=self.cleaned_data['nombre'],
+            last_name=self.cleaned_data['apellido']
         )
         guardia = super().save(commit=False)
-        guardia.usuario = user
+        guardia.user = user
         if commit:
             guardia.save()
         return guardia

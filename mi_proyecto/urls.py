@@ -34,12 +34,15 @@ urlpatterns = [
     # 📋 PANEL DE MONITOREO
     path('guardias/', views.panel_guardias, name='panel_guardias'),
     
+    # 🚨 RUTA DE EMERGENCIA
+    path('enviar-alerta/', views.enviar_alerta, name='enviar_alerta'),
+
     # 📊 API PARA GRÁFICAS EN TIEMPO REAL
     path('api/incidencias-datos/', views.datos_grafica_incidencias, name='api_incidencias'),
 
     # 💂‍♂️ CRUD DE GUARDIAS Y LISTA NEGRA
     path('guardias/lista/', views.lista_guardias, name='lista_guardias'),
-    path('guardias/lista-negra/', views.lista_negra, name='lista_negra'), # Ruta añadida
+    path('guardias/lista-negra/', views.lista_negra, name='lista_negra'),
     path('guardias/nuevo/', views.crear_guardia, name='crear_guardia'),
     path('guardias/editar/<int:id>/', views.editar_guardia, name='editar_guardia'),
     path('guardias/eliminar/<int:id>/', views.eliminar_guardia, name='eliminar_guardia'),
@@ -59,6 +62,11 @@ urlpatterns = [
     path('guardias/solicitudes-recibidas/', views.panel_solicitudes_administrador, name='panel_solicitudes_administrador'),
     path('solicitudes/procesar/<int:solicitud_id>/<str:accion>/', views.procesar_solicitud, name='procesar_solicitud'),
     path('solicitudes/<int:solicitud_id>/descargar-pdf/', views.descargar_aprobacion_pdf, name='descargar_aprobacion_pdf'),
+
+    # 💬 CANAL DE COMUNICACIÓN
+    path('chat/', views.chat_seguridad, name='chat_seguridad'),
+    path('chat/<str:username>/', views.chat_directo, name='chat_directo'),
+    path('api/mensajes-nuevos/', views.verificar_mensajes_nuevos, name='verificar_mensajes_nuevos'),
 ]
 
 if settings.DEBUG:

@@ -1,8 +1,47 @@
-<div style="width: 80%; margin: 40px auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-    <h3 style="text-align: center;">Estadísticas de Incidencias en Tiempo Real</h3>
-    <canvas id="graficaIncidencias" style="max-height: 400px;"></canvas>
+{% extends 'seguridad_unellez/base.html' %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h2>Panel de Monitoreo - Seguridad UNELLEZ</h2>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div style="width: 100%; margin-top: 20px; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <h3 style="text-align: center;">Estadísticas de Incidencias en Tiempo Real</h3>
+                <canvas id="graficaIncidencias" style="max-height: 400px;"></canvas>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mt-4 shadow">
+                <div class="card-header bg-dark text-white">
+                    <h5><i class="fas fa-comments"></i> Chat del Pabellón</h5>
+                </div>
+                <div class="card-body" style="height: 350px; overflow-y: scroll; background-color: #f1f3f5;">
+                    {% for msg in mensajes %}
+                        <div class="mb-2">
+                            <strong>{{ msg.emisor.nombre }}:</strong> <br>
+                            <span class="text-muted">{{ msg.contenido }}</span>
+                        </div>
+                    {% empty %}
+                        <p class="text-muted text-center">No hay mensajes aún.</p>
+                    {% endfor %}
+                </div>
+                <div class="card-footer">
+                    <form method="POST" action="{% url 'chat_seguridad' %}">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <input type="text" name="contenido" class="form-control" placeholder="Mensaje rápido..." required>
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     async function actualizarGrafica() {
@@ -15,7 +54,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const ctx = document.getElementById('graficaIncidencias').getContext('2d');
             
-            // Si ya existe una gráfica, destrúyela antes de crear una nueva (evita errores al recargar)
             if (window.miGrafica instanceof Chart) {
                 window.miGrafica.destroy();
             }
@@ -43,5 +81,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     actualizarGrafica();
     setInterval(actualizarGrafica, 30000);
-});
+}); 
 </script>
+{% endblock %}

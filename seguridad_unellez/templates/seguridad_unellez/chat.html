@@ -1,0 +1,45 @@
+{% extends 'seguridad_unellez/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-comments"></i> Canal de Comunicación: {{ guardia.area_asignada }}</h5>
+        </div>
+        
+        <div class="card-body" id="chat-container" style="height: 400px; overflow-y: scroll; background-color: #f8f9fa; padding: 20px;">
+            {% for msg in mensajes %}
+                <div class="mb-3 {% if msg.emisor == guardia %}text-right{% else %}text-left{% endif %}">
+                    <div class="d-inline-block p-2 rounded {% if msg.emisor == guardia %}bg-primary text-white{% else %}bg-light border{% endif %}">
+                        <strong>{{ msg.emisor.nombre }}</strong><br>
+                        {{ msg.contenido }}
+                    </div>
+                    <div style="font-size: 0.75rem; color: #6c757d;">
+                        {{ msg.fecha_envio|date:"d/m H:i" }}
+                    </div>
+                </div>
+            {% empty %}
+                <p class="text-center text-muted">No hay mensajes recientes en esta área.</p>
+            {% endfor %}
+        </div>
+
+        <div class="card-footer">
+            <form method="POST" id="chat-form">
+                {% csrf_token %}
+                <div class="input-group">
+                    <input type="text" name="contenido" class="form-control" placeholder="Escribe un mensaje urgente..." required>
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-success"><i class="fas fa-paper-plane"></i> Enviar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Esto hace que el chat siempre muestre los mensajes más nuevos al abrir
+    const chatContainer = document.getElementById("chat-container");
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+</script>
+{% endblock %}

@@ -1,4 +1,6 @@
-{% load static %}
+{% extends 'seguridad_unellez/base.html' %}
+{% load static %} 
+{% block content %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -51,7 +53,6 @@
 </head>
 <body>
 
-    <!-- BARRA LATERAL -->
     <div class="sidebar d-flex flex-column justify-content-between">
         <div>
             <div class="brand">
@@ -62,10 +63,12 @@
             <a href="{% url 'mi_perfil' %}" class="active"><i class="bi bi-person-vcard me-2"></i> Mi Perfil</a>
             <a href="{% url 'registrar_incidencia' %}"><i class="bi bi-exclamation-triangle me-2"></i> Reportar Novedad</a>
             
-            <!-- 📄 BOTÓN DE SOLICITUDES ADMINISTRATIVAS (VACACIONES, PERMISOS, ETC.) -->
             <a href="{% url 'mis_solicitudes' %}"><i class="bi bi-folder-symlink me-2"></i> Mis Solicitudes</a>
         </div>
         <div class="p-3">
+            <button type="button" class="btn btn-danger btn-block font-weight-bold shadow-sm mb-2" data-bs-toggle="modal" data-bs-target="#modalEmergencia">
+                <i class="bi bi-exclamation-circle"></i> ¡EMERGENCIA!
+            </button>
             <hr class="text-muted">
             <form action="{% url 'logout' %}" method="post" class="d-inline">
                 {% csrf_token %}
@@ -76,7 +79,27 @@
         </div>
     </div>
 
-    <!-- CONTENIDO PRINCIPAL -->
+    <div class="modal fade" id="modalEmergencia" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-danger">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Alerta de Emergencia</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <p>¿Confirma que desea enviar una alerta de emergencia a todos los oficiales cercanos?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <form action="{% url 'enviar_alerta' %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger px-4">ENVIAR ALERTA</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="main-content">
         
         {% if messages %}
@@ -109,11 +132,9 @@
         </div>
 
         {% if guardia %}
-        <!-- FICHA DE PERFIL -->
         <div class="profile-card mb-4">
             <div class="row align-items-center">
                 
-                <!-- Contenedor Foto de Perfil Interactiva -->
                 <div class="col-md-2 text-center text-md-start mb-3 mb-md-0">
                     <div class="position-relative d-inline-block rounded-circle overflow-hidden base-avatar border" 
                          style="cursor: pointer; width: 100px; height: 100px; box-shadow: 0 4px 10px rgba(0,0,0,0.08);" 
@@ -138,7 +159,6 @@
                     </div>
                 </div>
 
-                <!-- Información Básica -->
                 <div class="col-md-6">
                     <h3 class="fw-bold mb-1 text-dark text-capitalize">{{ guardia.nombre }}</h3>
                     <p class="text-muted mb-2 small"><i class="bi bi-card-text"></i> Cédula: {{ guardia.cedula }}</p>
@@ -160,7 +180,6 @@
                 </div>
             </div>
 
-            <!-- Alertas Informativas de Turnos -->
             <div class="mt-4">
                 {% if 'Nocturno' in guardia.turno or 'nocturno' in guardia.turno %}
                     <div class="alert alert-info border border-info-subtle d-flex align-items-center shadow-sm mb-0" role="alert" style="border-radius: 12px;">
@@ -197,7 +216,6 @@
 
             <hr class="my-4">
 
-            <!-- Horas de Progreso -->
             <div class="row align-items-center">
                 <div class="col-md-4">
                     <h6 class="mb-1 fw-bold text-secondary">Registro de Horas Acumuladas</h6>
@@ -212,7 +230,6 @@
             </div>
         </div>
 
-        <!-- TARJETAS DE ESTADÍSTICAS -->
         <div class="row g-3 mb-4">
             <div class="col-6 col-md-4">
                 <div class="stat-card p-3 rounded-3 text-center border bg-white shadow-sm">
@@ -237,7 +254,6 @@
             </div>
         </div>
 
-        <!-- TABLA DE HISTORIAL INDIVIDUAL -->
         <div class="data-card">
             <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-list-task text-danger me-2"></i>Historial Reciente de Mis Reportes</h5>
             <div class="table-responsive">
@@ -280,7 +296,6 @@
             </div>
         </div>
         {% else %}
-        <!-- Mensaje de error si la cuenta Django no está asociada a ningún Oficial -->
         <div class="alert alert-warning border border-warning shadow-sm" role="alert">
             <h5 class="alert-heading fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i>Usuario de Sistema sin Vinculación</h5>
             <p class="mb-0">Tu cuenta no posee un registro físico de Guardia de Seguridad asignado. Solicita al supervisor del sistema que asigne tu usuario de Django a tu ficha técnica desde el panel de administración.</p>
@@ -289,7 +304,6 @@
 
     </div>
 
-    <!-- MODAL PARA ACTUALIZAR FOTO DE PERFIL -->
     <div class="modal fade" id="modalFotoPerfil" tabindex="-1" aria-labelledby="modalFotoPerfilLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content rounded-4 shadow">
@@ -302,7 +316,6 @@
                     <div class="modal-body py-4">
                         <p class="text-secondary small mb-3">Selecciona una fotografía tuya en formato JPG o PNG para tu identificación en los reportes de seguridad del cuadrante.</p>
                         
-                        <!-- 👁️ CONTENEDOR DE PREVISUALIZACIÓN EN TIEMPO REAL -->
                         <div class="preview-container d-none" id="previewBox">
                             <img src="" id="imagePreview" alt="Previsualización">
                         </div>
@@ -323,31 +336,24 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // LÓGICA DE VALIDACIÓN Y PREVISUALIZACIÓN DE IMÁGENES EN TIEMPO REAL
         document.getElementById('inputFoto').addEventListener('change', function(event) {
             const file = event.target.files[0];
             const previewBox = document.getElementById('previewBox');
             const imagePreview = document.getElementById('imagePreview');
             const fileError = document.getElementById('fileError');
             const btnGuardar = document.getElementById('btnGuardarFoto');
-
             if (file) {
-                // Validar que sea una imagen válida y su tamaño (Máximo 2MB)
                 const isValidImage = file.type.startsWith('image/');
                 const isUnderLimit = file.size <= 2 * 1024 * 1024; 
-
                 if (!isValidImage || !isUnderLimit) {
                     fileError.classList.remove('d-none');
                     previewBox.classList.add('d-none');
                     btnGuardar.disabled = true;
-                    event.target.value = ''; // Limpiar el input
+                    event.target.value = '';
                     return;
                 }
-
-                // Si pasa las validaciones, mostrar la previsualización usando FileReader
                 fileError.classList.add('d-none');
                 btnGuardar.disabled = false;
-                
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     imagePreview.src = e.target.result;
@@ -356,8 +362,6 @@
                 reader.readAsDataURL(file);
             }
         });
-
-        // Limpiar previsualización al cerrar el modal si no se guardó
         document.getElementById('modalFotoPerfil').addEventListener('hidden.bs.modal', function () {
             document.getElementById('previewBox').classList.add('d-none');
             document.getElementById('imagePreview').src = '';
@@ -368,3 +372,4 @@
     </script>
 </body>
 </html>
+{% endblock content %}

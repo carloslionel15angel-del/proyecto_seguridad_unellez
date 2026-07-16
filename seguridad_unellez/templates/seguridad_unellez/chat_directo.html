@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat Institucional</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .chat-container { height: 80vh; display: flex; box-shadow: 0 0 15px rgba(0,0,0,0.1); border-radius: 10px; overflow: hidden; background: white; }
+        .sidebar { width: 300px; border-right: 1px solid #ddd; padding: 20px; overflow-y: auto; }
+        .chat-main { flex: 1; display: flex; flex-direction: column; }
+        .messages { flex: 1; padding: 20px; overflow-y: auto; background: #e5ddd5; }
+        .message { margin-bottom: 15px; padding: 10px 15px; border-radius: 15px; max-width: 70%; position: relative; }
+        .msg-own { background: #dcf8c6; align-self: flex-end; margin-left: auto; }
+        .msg-other { background: white; align-self: flex-start; }
+        .status-icon { font-size: 0.75rem; margin-left: 5px; color: #555; }
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <div class="chat-container">
+        <div class="sidebar">
+            <h5>Oficiales</h5>
+            <hr>
+            <div class="list-group">
+                {% for g in guardias %}
+                    <a href="{% url 'chat_directo' g.user.username %}" class="list-group-item list-group-item-action {% if receptor.username == g.user.username %}active{% endif %}">
+                        {{ g.nombre }} {{ g.apellido }}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="chat-main">
+            <div class="p-3 border-bottom bg-light">
+                {% if receptor %}
+                    <h5>Chat con {{ receptor.first_name }} {{ receptor.last_name }}</h5>
+                {% else %}
+                    <h5>Selecciona un contacto</h5>
+                {% endif %}
+            </div>
+
+            <div class="messages d-flex flex-column" id="chat-box">
+                {% for m in mensajes %}
+                    <div class="message {% if m.emisor.user == request.user %}msg-own{% else %}msg-other{% endif %}">
+                        <div>{{ m.contenido }}</div>
+                        
+                        {% if m.emisor.user == request.user %}
+                            <div class="text-end status-icon">
+                                {% if m.leido %}
+                                    <span style="color: #34b7f1;">✓✓</span>
+                                {% else %}
+                                    <span>✓</span>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% empty %}
+                    <p class="text-center text-muted mt-5">No hay mensajes aún.</p>
+                {% endfor %}
+            </div>
+
+            {% if receptor %}
+            <form method="POST" class="p-3 border-top d-flex">
+                {% csrf_token %}
+                <input type="text" name="contenido" class="form-control me-2" placeholder="Escribe un mensaje..." required autocomplete="off">
+                <button type="submit" class="btn btn-primary">Enviar</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    // Hacer que el chat baje automáticamente al último mensaje
+    const chatBox = document.getElementById('chat-box');
+    chatBox.scrollTop = chatBox.scrollHeight;
+</script>
+
+</body>
+</html>

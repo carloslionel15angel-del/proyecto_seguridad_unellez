@@ -37,18 +37,10 @@
                 </div>
                 
                 <div class="flex bg-white p-1.5 rounded-xl border border-gray-200 shadow-sm space-x-1 text-sm font-semibold">
-                    <a href="?estado=PENDIENTE" class="px-4 py-2 rounded-lg transition-colors {% if estado_actual == 'PENDIENTE' %} bg-amber-500 text-white {% else %} text-gray-600 hover:bg-gray-100 {% endif %}">
-                        Pendientes ({{ conteo_pendientes }})
-                    </a>
-                    <a href="?estado=APROBADA" class="px-4 py-2 rounded-lg transition-colors {% if estado_actual == 'APROBADA' %} bg-emerald-600 text-white {% else %} text-gray-600 hover:bg-gray-100 {% endif %}">
-                        Aprobadas ({{ conteo_aprobadas }})
-                    </a>
-                    <a href="?estado=RECHAZADA" class="px-4 py-2 rounded-lg transition-colors {% if estado_actual == 'RECHAZADA' %} bg-rose-600 text-white {% else %} text-gray-600 hover:bg-gray-100 {% endif %}">
-                        Rechazadas ({{ conteo_rechazadas }})
-                    </a>
-                    <a href="?estado=TODAS" class="px-4 py-2 rounded-lg transition-colors {% if estado_actual == 'TODAS' %} bg-slate-800 text-white {% else %} text-gray-600 hover:bg-gray-100 {% endif %}">
-                        Todas
-                    </a>
+                    <a href="?estado=PENDIENTE" class="px-4 py-2 rounded-lg transition-colors {% if estado_actual == 'PENDIENTE' %} bg-amber-500 text-white {% else %} text-gray-600 hover:bg-gray-100 {% endif %}">Pendientes</a>
+                    <a href="?estado=APROBADA" class="px-4 py-2 rounded-lg transition-colors {% if estado_actual == 'APROBADA' %} bg-emerald-600 text-white {% else %} text-gray-600 hover:bg-gray-100 {% endif %}">Aprobadas</a>
+                    <a href="?estado=RECHAZADA" class="px-4 py-2 rounded-lg transition-colors {% if estado_actual == 'RECHAZADA' %} bg-rose-600 text-white {% else %} text-gray-600 hover:bg-gray-100 {% endif %}">Rechazadas</a>
+                    <a href="?estado=TODAS" class="px-4 py-2 rounded-lg transition-colors {% if estado_actual == 'TODAS' %} bg-slate-800 text-white {% else %} text-gray-600 hover:bg-gray-100 {% endif %}">Todas</a>
                 </div>
             </div>
 
@@ -70,18 +62,10 @@
                         <div class="p-5 bg-gray-50 border-b border-gray-100 flex justify-between items-center">
                             <div class="flex items-center space-x-3">
                                 <div class="p-2.5 rounded-xl bg-slate-900 text-white">
-                                    {% if solicitud.tipo == 'VACACIONES' %}
-                                        <i class="fa-solid fa-umbrella-beach text-sky-400 text-lg"></i>
-                                    {% elif solicitud.tipo == 'PERMISO' %}
-                                        <i class="fa-solid fa-house-medical text-emerald-400 text-lg"></i>
-                                    {% elif solicitud.tipo == 'CAMBIO_TURNO' %}
-                                        <i class="fa-solid fa-repeat text-amber-400 text-lg"></i>
-                                    {% else %}
-                                        <i class="fa-solid fa-shirt text-purple-400 text-lg"></i>
-                                    {% endif %}
+                                    <i class="fa-solid fa-file-alt text-amber-400 text-lg"></i>
                                 </div>
                                 <div>
-                                    <h3 class="font-bold text-gray-900 text-base">{{ solicitud.get_tipo_display }}</h3>
+                                    <h3 class="font-bold text-gray-900 text-base">{{ solicitud.tipo }}</h3>
                                     <p class="text-xs text-gray-400">Creado el: {{ solicitud.creado_en|date:"d/m/Y - h:i a" }}</p>
                                 </div>
                             </div>
@@ -108,74 +92,50 @@
                                 </div>
                             </div>
 
-                            {% if solicitud.fecha_inicio or solicitud.fecha_fin %}
                             <div class="text-xs font-semibold text-gray-600 flex items-center space-x-4 bg-gray-50 p-2.5 rounded-lg">
-                                <span><i class="fa-regular fa-calendar mr-1.5 text-gray-400"></i>Inicio: {{ solicitud.fecha_inicio|date:"d/m/Y"|default:"--" }}</span>
-                                <span><i class="fa-regular fa-calendar-check mr-1.5 text-gray-400"></i>Fin: {{ solicitud.fecha_fin|date:"d/m/Y"|default:"--" }}</span>
+                                <span><i class="fa-regular fa-calendar mr-1.5 text-gray-400"></i>Inicio: {{ solicitud.fecha_inicio|date:"d/m/Y" }}</span>
+                                <span><i class="fa-regular fa-calendar-check mr-1.5 text-gray-400"></i>Fin: {{ solicitud.fecha_fin|date:"d/m/Y" }}</span>
                             </div>
-                            {% endif %}
 
                             <div class="space-y-1">
-                                <span class="text-xs font-bold uppercase tracking-wider text-gray-400">Justificación del Funcionario:</span>
-                                <p class="text-gray-700 bg-gray-50/50 p-3 rounded-xl border border-gray-100 text-sm leading-relaxed whitespace-pre-line font-medium italic">
-                                    {% if solicitud.descripcion %}
-                                        "{{ solicitud.descripcion }}"
-                                    {% elif solicitud.motivo %}
-                                        "{{ solicitud.motivo }}"
-                                    {% elif solicitud.justificacion %}
-                                        "{{ solicitud.justificacion }}"
-                                    {% else %}
-                                        <span class="text-gray-400 not-italic">No se ingresó ninguna justificación de texto para este requerimiento.</span>
-                                    {% endif %}
+                                <span class="text-xs font-bold uppercase tracking-wider text-gray-400">Motivo:</span>
+                                <p class="text-gray-700 bg-gray-50/50 p-3 rounded-xl border border-gray-100 text-sm italic">
+                                    "{{ solicitud.motivo }}"
                                 </p>
                             </div>
                         </div>
 
-                        <!-- SECCIÓN DE ACCIONES MEJORADA -->
                         <div class="px-6 pb-6 pt-3 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row items-center justify-between gap-3">
                             {% if solicitud.estado == 'PENDIENTE' %}
                                 <div class="w-full flex justify-end space-x-3">
-                                    <a href="{% url 'procesar_solicitud' solicitud.id 'rechazar' %}" class="px-4 py-2.5 rounded-xl border border-rose-200 text-rose-700 bg-white hover:bg-rose-50 font-bold text-sm transition-colors duration-150 flex items-center space-x-1.5">
-                                        <i class="fa-solid fa-xmark"></i>
-                                        <span>Rechazar</span>
+                                    <a href="{% url 'procesar_solicitud' solicitud.id 'rechazar' %}" class="px-4 py-2.5 rounded-xl border border-rose-200 text-rose-700 bg-white hover:bg-rose-50 font-bold text-sm transition-colors flex items-center">
+                                        Rechazar
                                     </a>
-                                    <a href="{% url 'procesar_solicitud' solicitud.id 'aprobar' %}" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md shadow-emerald-600/10 transition-all duration-150 hover:-translate-y-0.5 flex items-center space-x-1.5">
-                                        <i class="fa-solid fa-check"></i>
-                                        <span>Aprobar Requerimiento</span>
+                                    <a href="{% url 'procesar_solicitud' solicitud.id 'aprobar' %}" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md transition-all flex items-center">
+                                        Aprobar
                                     </a>
                                 </div>
                             {% else %}
-                                <div class="text-xs text-gray-400 italic flex items-center">
-                                    <i class="fa-solid fa-user-check mr-1.5 text-gray-400"></i>
-                                    Procesada por: {{ solicitud.revisado_por.username|default:"Sistema Central" }}
+                                <div class="text-xs text-gray-400 italic">
+                                    Estado finalizado
                                 </div>
                                 
-                                <!-- NUEVO ENLACE: Descargar comprobante oficial si está APROBADA -->
                                 {% if solicitud.estado == 'APROBADA' %}
-                                    <a href="{% url 'descargar_aprobacion_pdf' solicitud.id %}" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition-all flex items-center justify-center space-x-1.5 shadow-sm">
+                                    <a href="{% url 'descargar_aprobacion_pdf' solicitud.id %}" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition-all flex items-center justify-center space-x-1.5 shadow-sm">
                                         <i class="fa-solid fa-file-pdf"></i>
                                         <span>Comprobante PDF</span>
                                     </a>
                                 {% endif %}
                             {% endif %}
                         </div>
-
                     </div>
                 {% empty %}
                     <div class="col-span-full bg-white rounded-2xl border border-gray-200 p-12 text-center">
-                        <div class="flex flex-col items-center justify-center space-y-3">
-                            <div class="p-4 bg-gray-100 rounded-full text-gray-400">
-                                <i class="fa-solid fa-inbox text-4xl"></i>
-                            </div>
-                            <h3 class="font-bold text-lg text-gray-800">Buzón completamente limpio</h3>
-                            <p class="text-gray-500 text-sm max-w-sm mx-auto">No hay peticiones registradas o pendientes bajo el filtro seleccionado en este momento.</p>
-                        </div>
+                        <p class="text-gray-500">No hay peticiones registradas.</p>
                     </div>
                 {% endfor %}
             </div>
-
         </main>
     </div>
-
 </body>
 </html>

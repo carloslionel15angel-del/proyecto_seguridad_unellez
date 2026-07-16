@@ -1,15 +1,13 @@
-from pathlib import Path
 import os
+from pathlib import Path
 
-# Directorio Base
+# Definimos BASE_DIR correctamente
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SEGURIDAD
 SECRET_KEY = 'django-insecure-1idk2)1km2=+)$ys56yu$azc0g9=g*!(pe*k^2#i57g^o)+4b)'
 DEBUG = True
 ALLOWED_HOSTS = []
 
-# Aplicaciones instaladas
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -32,12 +30,11 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'mi_proyecto.urls'
 
-# CONFIGURACIÓN DE PLANTILLAS
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [], # Django buscará en las carpetas 'templates' de cada app automáticamente
-        'APP_DIRS': True, # Esto es lo que permite usar 'seguridad_unellez/templates/'
+        'DIRS': [], 
+        'APP_DIRS': True, 
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -51,7 +48,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'mi_proyecto.wsgi.application'
 
-# Base de datos
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -59,7 +55,6 @@ DATABASES = {
     }
 }
 
-# Validación de contraseñas
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -67,28 +62,25 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# Internacionalización
 LANGUAGE_CODE = 'es'
 TIME_ZONE = 'America/Caracas'
 USE_I18N = True
 USE_TZ = True
 
-# Archivos estáticos y multimedia
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# --- CONFIGURACIÓN CORREGIDA DE ARCHIVOS ---
+STATIC_URL = '/static/'  # Añadida la barra inicial
+STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'   # Añadida la barra inicial
+MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Configuración de Login
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'lista_guardias'
 LOGOUT_REDIRECT_URL = 'login'
 
-# Estilos de mensajes
 from django.contrib.messages import constants as messages
 MESSAGE_TAGS = {
     messages.DEBUG: 'secondary',
@@ -98,7 +90,6 @@ MESSAGE_TAGS = {
     messages.ERROR: 'danger',
 }
 
-# Configuración de Correo
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
